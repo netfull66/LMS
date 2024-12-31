@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Subjects</title>
+</head>
+<body>
+    <h1>Your Subjects</h1>
+    {% if subjects %}
+        <ul>
+            {% for subject in subjects %}
+                <li>
+                    <strong>{{ subject.name }}</strong> - Grade: {{ subject.grade }}, Class: {{ subject.class_name }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no assigned subjects.</p>
+    {% endif %}
+</body>
+</html>

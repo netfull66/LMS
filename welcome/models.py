@@ -33,16 +33,6 @@ class User(AbstractUser):
     class_name = models.CharField(max_length=50, blank=True, null=True)
 
 
-class Subject(models.Model):
-    name = models.CharField(max_length=100)
-    teacher = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': 'teacher'},
-        related_name='teacher'
-    )
-    grade = models.CharField(max_length=50)
-    class_name = models.CharField(max_length=50)
 
 class School(models.Model):
     name = models.CharField(max_length=255)
