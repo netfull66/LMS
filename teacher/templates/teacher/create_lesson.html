@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Lesson</title>
+</head>
+<body>
+    <h1>Create a New Lesson for {{ subject.name }}</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Lesson</button>
+    </form>
+    <br>
+    <!-- This link will navigate back to the lessons list for this specific subject -->
+    <a href="{% url 'subject_lessons' subject_id=subject.id %}">Back to Lessons</a>
+</body>
+</html>
