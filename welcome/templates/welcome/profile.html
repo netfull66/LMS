@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile</title>
+</head>
+<body>
+    <h1>Your Profile</h1>
+
+    <div>
+        <h2>Profile Details</h2>
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Role:</strong> {{ user.role }}</p>
+        <p><strong>Gender:</strong> {{ user.get_gender_display }}</p>
+        <p><strong>Religion:</strong> {{ user.get_religion_display }}</p>
+        <p><strong>Grade:</strong> {{ user.grade }}</p>
+        <p><strong>Class:</strong> {{ user.class_name }}</p>
+    </div>
+
+    <hr>
+
+    <h2>Change Your Password</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div>
+            <button type="submit">Save Changes</button>
+        </div>
+    </form>
+
+    <hr>
+    <div>
+        <p><a href="{% url 'logout' %}">Logout</a></p>
+    </div>
+</body>
+</html>
