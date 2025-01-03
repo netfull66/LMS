@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import create_subject,teacher_subjects,subject_lessons,create_lesson,download_lesson_file
+from .views import (
+    create_subject, teacher_subjects, subject_lessons, create_lesson,
+    download_lesson_file,lesson_detail, view_lesson_file
+)
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -9,5 +12,6 @@ urlpatterns = [
     path('lesson/create/<int:subject_id>/', create_lesson, name='create_lesson'),
     path('subject/<int:subject_id>/lessons/', subject_lessons, name='subject_lessons'),
     path('lesson/download/<int:lesson_id>/', download_lesson_file, name='download_lesson_file'),
-
+    path('lesson/<int:lesson_id>/', lesson_detail, name='lesson_detail'),
+    path('lesson/view/<int:lesson_id>/', view_lesson_file, name='view_lesson_file'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

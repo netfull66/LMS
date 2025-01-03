@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson.name }} Details</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .file-viewer {
+            width: 100%;
+            height: 600px;
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            position: relative;
+        }
+        .file-viewer iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .video-container {
+            width: 100%;
+            height: 450px;
+            margin: 20px 0;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .action-links {
+            margin: 20px 0;
+        }
+        .action-links a {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .action-links a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ lesson.name }}</h1>
+        
+        {% if lesson.files %}
+            <div class="lesson-file">
+                <h3>Lesson File</h3>
+                <div class="action-links">
+                    <a href="{% url 'download_lesson_file' lesson_id=lesson.id %}">Download File</a>
+                    <a href="{% url 'view_lesson_file' lesson_id=lesson.id %}" target="_blank">Open in New Tab</a>
+                </div>
+                
+                {% with file_ext=lesson.files.name|lower %}
+                    {% if file_ext|slice:"-4:" == '.pdf' %}
+                        <div class="file-viewer">
+                            <iframe 
+                                src="{% url 'view_lesson_file' lesson_id=lesson.id %}"
+                                sandbox="allow-same-origin allow-scripts allow-forms"
+                                >
+                            </iframe>
+                        </div>
+                    {% elif file_ext|slice:"-4:" == '.txt' %}
+                        <iframe 
+                            class="file-viewer" 
+                            src="{% url 'view_lesson_file' lesson_id=lesson.id %}"
+                            sandbox="allow-same-origin allow-scripts allow-forms">
+                        </iframe>
+                    {% else %}
+                        <div class="file-viewer">
+                            <p>Preview not available for this file type. Please download or open in new tab to view.</p>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        {% endif %}
+
+        {% if lesson.video_link %}
+            <div class="lesson-video">
+                <h3>Video Content</h3>
+                {% if 'youtube.com' in lesson.video_link or 'youtu.be' in lesson.video_link %}
+                    <div class="video-container">
+                        <iframe 
+                            src="{{ lesson.get_youtube_embed_url }}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                {% else %}
+                    <p><a href="{{ lesson.video_link }}" target="_blank">Watch Video</a></p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'subject_lessons' subject_id=lesson.subject.id %}">Back to Lessons</a>
+    </div>
+</body>
+</html> 

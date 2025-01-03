@@ -75,3 +75,40 @@ def download_lesson_file(request, lesson_id):
         response = HttpResponse(file.read(), content_type='application/octet-stream')
         response['Content-Disposition'] = f'attachment; filename="{lesson.files.name}"'
         return response
+
+
+def lesson_detail(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    return render(request, 'teacher/lesson_detail.html', {'lesson': lesson})
+
+def view_lesson_file(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    
+    if not lesson.files:
+        raise Http404("File not found.")
+    
+    file_path = lesson.files.path
+    
+    if not os.path.exists(file_path):
+        raise Http404("File not found.")
+    
+    # Get the file extension
+    file_extension = os.path.splitext(file_path)[1].lower()
+    
+    # Set the content type based on file extension
+    content_types = {
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.txt': 'text/plain',
+    }
+    
+    content_type = content_types.get(file_extension, 'application/octet-stream')
+    
+    # Read and return the file
+    with open(file_path, 'rb') as file:
+        response = HttpResponse(file.read(), content_type=content_type)
+        # Allow iframe embedding and same-origin requests
+        response['X-Frame-Options'] = 'SAMEORIGIN'
+        response['Content-Security-Policy'] = "default-src 'self'; frame-ancestors 'self'"
+        return response
