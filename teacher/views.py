@@ -1,8 +1,10 @@
 import os
 from django.shortcuts import render, redirect ,get_object_or_404
-from .forms import SubjectForm , LessonForm
-from .models import Subject ,Lesson
+from .forms import SubjectForm , LessonForm, QuizForm, QuestionForm, AssignmentForm
+from .models import Subject ,Lesson, Quiz, Question , Assignment
 from django.http import HttpResponse, Http404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 def create_subject(request):
     if request.method == 'POST':
@@ -112,3 +114,122 @@ def view_lesson_file(request, lesson_id):
         response['X-Frame-Options'] = 'SAMEORIGIN'
         response['Content-Security-Policy'] = "default-src 'self'; frame-ancestors 'self'"
         return response
+
+
+def create_quiz(request, subject_id):
+    subject = get_object_or_404(Subject, id=subject_id)
+
+    if request.method == 'POST':
+        quiz_form = QuizForm(request.POST)
+        
+        if quiz_form.is_valid():
+            # Create quiz instance
+            quiz = quiz_form.save(commit=False)
+            quiz.subject = subject  # Associate the quiz with the subject
+            quiz.save()  # Save the quiz to the database
+
+            # Handle questions
+            for i in range(1, int(request.POST.get('question_count', 1)) + 1):
+                question_text = request.POST.get(f'question{i}')
+                question_type = request.POST.get(f'questionType{i}')
+                answer = request.POST.get(f'answer{i}')
+                
+                if question_text and question_type and answer:
+                    # Create question instance
+                    question = Question(
+                        quiz=quiz,
+                        question_text=question_text,
+                        question_type=question_type,
+                        correct_answer=answer,
+                        points=1  # Default value, you can make this configurable
+                    )
+                    
+                    # Save choices for multiple choice questions
+                    if question_type == 'multiple_choice':
+                        for j in range(1, 5):
+                            choice = request.POST.get(f'choice{i}_{j}')
+                            if choice:
+                                setattr(question, f'choice_{j}', choice)
+                    
+                    # Save the question with all its data
+                    question.save()
+            
+            messages.success(request, "Quiz created successfully!")
+            return redirect('subject_quizzes', subject_id=subject.id)  # Redirect to the quizzes page
+            
+        else:
+            print("Form errors:", quiz_form.errors)  # Debug print
+    else:
+        quiz_form = QuizForm()
+
+    return render(request, 'teacher/create_quiz.html', {
+        'quiz_form': quiz_form,
+        'subject': subject
+    })
+
+def add_questions(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+
+    if request.method == 'POST':
+        question_form = QuestionForm(request.POST)
+        if question_form.is_valid():
+            question = question_form.save(commit=False)
+            question.quiz = quiz
+            question.save()
+            # Redirect to the same page to add more questions or to a summary page
+            return redirect('add_questions', quiz_id=quiz.id)
+    else:
+        question_form = QuestionForm()
+
+    return render(request, 'teacher/add_questions.html', {'form': question_form, 'quiz': quiz})
+
+def subject_quizzes(request, subject_id):
+    subject = get_object_or_404(Subject, id=subject_id)
+
+    # Ensure the user is a teacher and is the teacher of the subject
+    if request.user.role != 'teacher' or subject.teacher != request.user:
+        return HttpResponse("You do not have permission to view these quizzes.", status=403)
+
+    quizzes = subject.quizzes.all()
+    return render(request, 'teacher/subject_quizzes.html', {'subject': subject, 'quizzes': quizzes})
+
+def edit_quiz(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+
+    if request.method == 'POST':
+        form = QuizForm(request.POST, instance=quiz)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Quiz updated successfully!")
+            return redirect('quiz_detail', quiz_id=quiz.id)
+    else:
+        form = QuizForm(instance=quiz)
+
+    return render(request, 'teacher/edit_quiz.html', {'form': form, 'quiz': quiz})
+
+def quiz_detail(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    questions = quiz.questions.all()  # Assuming 'questions' is the related name for questions in the Quiz model
+    return render(request, 'teacher/quiz_detail.html', {'quiz': quiz, 'questions': questions})
+
+@login_required
+def create_assignment(request, subject_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    subject = get_object_or_404(Subject, id=subject_id)
+    
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.subject = subject
+            assignment.teacher = request.user
+            assignment.save()
+            return redirect('assignment_list')
+    else:
+        form = AssignmentForm()
+    
+    return render(request, 'teacher/create_assignment.html', {
+        'form': form,
+        'subject': subject
+    })

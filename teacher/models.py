@@ -53,7 +53,7 @@ class Quiz(models.Model):
         ordering = ['-created_at']
         verbose_name_plural = "Quizzes"
 
-    def __str__(self):
+    def str(self):
         return self.title
 
     @property
@@ -80,5 +80,25 @@ class Question(models.Model):
     choice_3 = models.CharField(max_length=200, blank=True, null=True)
     choice_4 = models.CharField(max_length=200, blank=True, null=True)
     
-    def __str__(self):
+    def str(self):
         return f"{self.quiz.title} - {self.question_text[:50]}"
+
+
+class Assignment(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='assignments')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    due_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-due_date']
+        verbose_name_plural = "Assignments"
+
+    def _str_(self):
+        return f"{self.subject.name} - {self.title}"
+
+    @property
+    def is_overdue(self):
+        return timezone.now() > self.due_date

@@ -1,8 +1,7 @@
 from django import forms
 from welcome.models import User
-from .models import Subject ,Lesson
+from .models import Subject ,Lesson, Quiz, Question , Assignment
 from django.forms import inlineformset_factory
-from .models import Quiz, Question
 
 class SubjectForm(forms.ModelForm):
     class Meta:
@@ -53,3 +52,16 @@ QuestionFormSet = inlineformset_factory(
     min_num=1,  # Minimum number of forms
     validate_min=True,  # Enforce minimum number of forms
 )
+
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['title', 'description', 'due_date', 'subject']
+    
+    def _init_(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super()._init_(*args, **kwargs)
+        if user and user.role == 'teacher':
+            # Limit subjects to those taught by the current teacher
+            self.fields['subject'].queryset = user.teacher.all()

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Subject ,Lesson , Quiz , Question
+from .models import Subject ,Lesson , Quiz , Question, Assignment
 
 class LessonAdmin(admin.ModelAdmin):
     list_display = ['name', 'subject', 'video_link']
@@ -8,3 +8,4 @@ admin.site.register(Lesson, LessonAdmin)
 admin.site.register(Subject)
 admin.site.register(Quiz)
 admin.site.register(Question)
+admin.site.register(Assignment)

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Details: {{ quiz.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        p, li {
+            color: #555;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .question-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .edit-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ quiz.title }}</h1>
+    <p><strong>Description:</strong> {{ quiz.description }}</p>
+    <p><strong>Start Date:</strong> {{ quiz.start_date }} {{ quiz.start_time }}</p>
+    <p><strong>End Date:</strong> {{ quiz.end_date }} {{ quiz.end_time }}</p>
+
+    <h2>Questions</h2>
+    <div class="question-container">
+        {% for question in questions %}
+            <div>
+                <p><strong>Question:</strong> {{ question.question_text }}</p>
+                <p><strong>Type:</strong> {{ question.question_type }}</p>
+                <p><strong>Correct Answer:</strong> {{ question.correct_answer }}</p>
+                <p><strong>Choices:</strong></p>
+                <ul>
+                    <li>Choice 1: {{ question.choice_1 }}</li>
+                    <li>Choice 2: {{ question.choice_2 }}</li>
+                    <li>Choice 3: {{ question.choice_3 }}</li>
+                    <li>Choice 4: {{ question.choice_4 }}</li>
+                </ul>
+            </div>
+            <hr>
+        {% empty %}
+            <p>No questions available for this quiz.</p>
+        {% endfor %}
+    </div>
+
+    <a href="{% url 'edit_quiz' quiz.id %}" class="edit-button">Edit Quiz</a>
+</body>
+</html>
